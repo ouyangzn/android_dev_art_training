@@ -71,7 +71,7 @@ public class Chapter2MessengerService extends Service {
             Message reply = Message.obtain();
             reply.what = MSG_HELLO_2;
             Bundle bundle = new Bundle(1);
-            bundle.putString(MSG_DATA_KEY_HELLO, "received.");
+            bundle.putString(MSG_DATA_KEY_HELLO, "hahaha.");
             reply.setData(bundle);
             try {
               msg.replyTo.send(reply);

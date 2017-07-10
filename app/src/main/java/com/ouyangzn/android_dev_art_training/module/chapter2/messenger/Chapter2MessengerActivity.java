@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.view.View;
 import com.ouyangzn.android_dev_art_training.R;
 import com.ouyangzn.android_dev_art_training.base.BaseActivity;
 import com.ouyangzn.android_dev_art_training.utils.Log;
@@ -25,26 +26,27 @@ public class Chapter2MessengerActivity extends BaseActivity {
   public static final String MSG_DATA_KEY_HELLO = "key_hello";
 
   private ServiceConnection mConnection;
-  private Messenger mCommunityMessenger;
+  private Messenger mReceiveMessenger;
+  private Messenger mSendMessenger;
 
   @Override protected int getContentResId() {
     return R.layout.layout_activity_chapter2_messenger;
   }
 
   @Override protected void initData() {
-    mCommunityMessenger = new Messenger(new MessengerHandler(Chapter2MessengerActivity.this));
+    mReceiveMessenger = new Messenger(new MessengerHandler(Chapter2MessengerActivity.this));
     Intent intent = new Intent(this, Chapter2MessengerService.class);
     mConnection = new ServiceConnection() {
       @Override public void onServiceConnected(ComponentName name, IBinder service) {
-        Messenger messenger = new Messenger(service);
+        mSendMessenger = new Messenger(service);
         Message msg = Message.obtain();
         msg.what = MSG_HELLO;
-        msg.replyTo = mCommunityMessenger;
+        msg.replyTo = mReceiveMessenger;
         Bundle bundle = new Bundle(1);
         bundle.putString(MSG_DATA_KEY_HELLO, "hello service!");
         msg.setData(bundle);
         try {
-          messenger.send(msg);
+          mSendMessenger.send(msg);
         } catch (RemoteException e) {
           Log.e(TAG, "send message error:" + e.getMessage(), e);
         }
@@ -55,11 +57,24 @@ public class Chapter2MessengerActivity extends BaseActivity {
       }
     };
     getApplicationContext().bindService(intent, mConnection, BIND_AUTO_CREATE);
-    //startService(intent);
   }
 
   @Override protected void initView(Bundle savedInstanceState) {
 
+  }
+
+  public void sendMsg(View v) {
+    Message reply = Message.obtain();
+    reply.what = MSG_HELLO_2;
+    reply.replyTo = mReceiveMessenger;
+    Bundle bundle = new Bundle(1);
+    bundle.putString(MSG_DATA_KEY_HELLO, "haha.");
+    reply.setData(bundle);
+    try {
+      mSendMessenger.send(reply);
+    } catch (RemoteException e) {
+      Log.e(TAG, "----------reply message error：" + e.getMessage(), e);
+    }
   }
 
   @Override protected void onDestroy() {
@@ -82,19 +97,19 @@ public class Chapter2MessengerActivity extends BaseActivity {
           case MSG_HELLO: {
             Log.d(activity.TAG, "----------received message from service：" + msg.getData()
                 .getString(MSG_DATA_KEY_HELLO));
-            if (msg.replyTo != null) {
-              Message reply = Message.obtain();
-              reply.what = MSG_HELLO_2;
-              reply.replyTo = activity.mCommunityMessenger;
-              Bundle bundle = new Bundle(1);
-              bundle.putString(MSG_DATA_KEY_HELLO, "haha.");
-              reply.setData(bundle);
-              try {
-                msg.replyTo.send(reply);
-              } catch (RemoteException e) {
-                Log.e(activity.TAG, "----------reply message error：" + e.getMessage(), e);
-              }
-            }
+            //if (msg.replyTo != null) {
+            //  Message reply = Message.obtain();
+            //  reply.what = MSG_HELLO_2;
+            //  reply.replyTo = activity.mCommunityMessenger;
+            //  Bundle bundle = new Bundle(1);
+            //  bundle.putString(MSG_DATA_KEY_HELLO, "haha.");
+            //  reply.setData(bundle);
+            //  try {
+            //    msg.replyTo.send(reply);
+            //  } catch (RemoteException e) {
+            //    Log.e(activity.TAG, "----------reply message error：" + e.getMessage(), e);
+            //  }
+            //}
             break;
           }
           case MSG_HELLO_2: {
