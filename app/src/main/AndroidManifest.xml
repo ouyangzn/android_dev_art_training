@@ -21,5 +21,12 @@
         android:name=".module.mutil_process_sp.ProcessActivity"
         android:process=":process_1">
     </activity>
+    <activity android:name=".module.chapter2.messenger.Chapter2MessengerActivity"/>
+
+    <service
+        android:name=".module.chapter2.messenger.Chapter2MessengerService"
+        android:process=":process_chapter2"
+        >
+    </service>
   </application>
 </manifest>
